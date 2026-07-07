@@ -159,6 +159,74 @@ app.post('/api/generate-content', async (req: Request, res: Response): Promise<v
     }
 });
 
+import cron from 'node-cron';
+
+// جدولة مهمة مأتمتة تعمل تلقائياً مرة واحدة يومياً عند منتصف الليل (00:00)
+cron.schedule('0 0 * * *', async () => {
+    console.log('Running daily subscription renewal check...');
+
+    try {
+        const thirtyDaysAgo = new Date();
+        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+        // 1. فحص سوبابيس لجلب المستخدمين الذين انتهت فترة الـ 30 يوماً الخاصة بهم واشتراكهم نشط
+        const { data: expiredSubscriptions, error } = await supabase
+            .from('subscriptions')
+            .select('*')
+            .eq('is_subscribed', true)
+            .lte('updated_at', thirtyDaysAgo); // تم التحديث قبل 30 يوماً أو أكثر
+
+        if (error) {
+            console.error('Error fetching expired subscriptions:', error.message);
+            return;
+        }
+
+        if (!expiredSubscriptions || expiredSubscriptions.length === 0) {
+            console.log('No subscriptions up for renewal today.');
+            return;
+        }
+
+        // 2. المرور على كل مستخدم منتهي الصلاحية وخصم الاشتراك تلقائياً عبر التوكن الخاص به
+        for (const sub of expiredSubscriptions) {
+            if (!sub.paytabs_token) continue; // تخطي العميل إذا لم يكن لديه بطاقة محفوظة
+
+            const recurringDetails = {
+                tran_type: "recurring", // تحديد العملية كخصم تلقائي متكرر
+                tran_class: "ecom",
+                cart_id: `rec_${sub.id}_${Date.now()}`,
+                cart_currency: "USD",
+                cart_amount: 19.00, // قيمة القسط الشهري الثابت
+                cart_description: "Monthly Renewal - Professional AI Content SaaS",
+                token: sub.paytabs_token // إرسال التوكن السري المخزن للبطاقة
+            };
+
+            // إرسال طلب الدفع الفوري والمخفي لـ PayTabs دون تدخل العميل
+            paytabs.createPaymentPage(recurringDetails, async (result: any) => {
+                if (result && result.payment_result && result.payment_result.response_status === "A") {
+                    console.log(`Successfully renewed subscription for user: ${sub.id}`);
+                    
+                    // تحديث تاريخ التجديد لـ 30 يوماً إضافية في قاعدة البيانات
+                    await supabase
+                        .from('subscriptions')
+                        .update({ updated_at: new Date() })
+                        .eq('id', sub.id);
+                } else {
+                    console.log(`Failed to charge user: ${sub.id}. Subscription will be deactivated.`);
+                    
+                    // إذا فشل الخصم (بسبب انتهاء صلاحية البطاقة أو عدم وجود رصيد)، يتم إيقاف الاشتراك تلقائياً
+                    await supabase
+                        .from('subscriptions')
+                        .update({ is_subscribed: false })
+                        .eq('id', sub.id);
+                }
+            });
+        }
+
+    } catch (err: any) {
+        console.error('Subscription cron job error:', err.message);
+    }
+});
+
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
 });
