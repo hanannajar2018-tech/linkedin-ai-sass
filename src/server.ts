@@ -24,39 +24,14 @@ app.use(express.json());
 
 const PORT = process.env.PORT || 5000;
 
-// مسار ربط حساب LinkedIn وجلب البيانات
-app.post('/api/auth/linkedin', async (req: Request, res: Response): Promise<void> => {
-    const { code } = req.body;
-    if (!code) { res.status(400).json({ error: 'OAuth code is required' }); return; }
-    try {
-        const tokenResponse = await axios.post('https://linkedin.com', null, {
-            params: {
-                grant_type: 'authorization_code',
-                code,
-                client_id: process.env.LINKEDIN_CLIENT_ID,
-                client_secret: process.env.LINKEDIN_CLIENT_SECRET,
-                redirect_uri: process.env.LINKEDIN_REDIRECT_URI,
-            },
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
-        });
-        const accessToken = tokenResponse.data.access_token;
-        const profileResponse = await axios.get('https://linkedin.com', {
-            headers: { Authorization: `Bearer ${accessToken}` }
-        });
-        res.json({ success: true, profile: profileResponse.data });
-    } catch (error: any) {
-        res.status(500).json({ error: 'LinkedIn authentication failed', details: error.message });
-    }
-});
-
-// إنشاء صفحة دفع الاشتراك وطلب حفظ البطاقة (PayTabs Page)
+// [محدث] إنشاء صفحة دفع الاشتراك وربطها بمعرف العميل من سوبابيس
 app.post('/api/checkout/session', async (req: Request, res: Response): Promise<void> => {
     const { userId, customerName, customerEmail, amount, currency } = req.body;
 
     const paymentDetails = {
         tran_type: "sale",
         tran_class: "ecom",
-        cart_id: `sub_${userId}_${Date.now()}`, // نضع رقم المستخدم هنا لنعرفه عند عودة تأكيد الدفع
+        cart_id: `sub_${userId}_${Date.now()}`, 
         cart_currency: currency || "USD",
         cart_amount: amount || 19.00,
         cart_description: "Professional AI Content Generation - Monthly Subscription",
@@ -71,7 +46,7 @@ app.post('/api/checkout/session', async (req: Request, res: Response): Promise<v
             country: "EG",
         },
         urls: {
-            return: "http://localhost:3000/success",
+            return: "http://localhost:5173/success", // رابط الـ Frontend المحلي بعد التحديث
             callback: "https://your-domain.com"
         },
         tokenise: 2 
@@ -90,7 +65,7 @@ app.post('/api/checkout/session', async (req: Request, res: Response): Promise<v
     }
 });
 
-// الأتمتة الكاملة: استقبال تأكيد الدفع التلقائي وتحديث قاعدة البيانات فوراً
+// [مستقر] استقبال تأكيد الدفع الفوري وتحديث قاعدة البيانات تلقائياً
 app.post('/api/ipn', async (req: Request, res: Response): Promise<void> => {
     const ipnData = req.body;
 
@@ -98,14 +73,12 @@ app.post('/api/ipn', async (req: Request, res: Response): Promise<void> => {
         const token = ipnData.token; 
         const customerEmail = ipnData.customer_details.email;
         
-        // استخراج معرف المستخدم من الـ cart_id الذي أرسلناه سابقاً
         const cartIdParts = ipnData.cart_id.split('_');
-        const userId = cartIdParts[1]; 
+        const userId = cartIdParts[1]; // استخراج الـ ID بدقة
 
         console.log(`Payment authorized. Updating database for User: ${userId}`);
 
-        // تحديث قاعدة البيانات في Supabase تلقائياً لفتح ميزات الذكاء الاصطناعي للمستخدم
-        const { error } = await supabase
+        await supabase
             .from('subscriptions')
             .upsert({ 
                 id: userId, 
@@ -114,21 +87,21 @@ app.post('/api/ipn', async (req: Request, res: Response): Promise<void> => {
                 paytabs_token: token,
                 updated_at: new Date()
             });
-
-        if (error) {
-            console.error("Failed to update Supabase database:", error.message);
-        }
     }
-
     res.status(200).send("IPN Notification Processed");
 });
 
-// مسار توليد المحتوى الاحترافي بالذكاء الاصطناعي مع التحقق التلقائي من حالة الاشتراك
+// [محدث] مسار توليد المحتوى الذكي بالاعتماد المباشر على النص المنسوخ
 app.post('/api/generate-content', async (req: Request, res: Response): Promise<void> => {
-    const { userId, userProfile, contentType } = req.body; 
+    const { userId, rawProfileText, contentType } = req.body; 
+
+    if (!rawProfileText || rawProfileText.trim().length < 10) {
+        res.status(400).json({ error: 'Please provide a valid profile text or bio' });
+        return;
+    }
 
     try {
-        // فحص قاعدة البيانات للتأكد من أن المستخدم مشترك حقيقي ونشط حالياً
+        // الفحص التلقائي للاشتراك في سوبابيس
         const { data: subscription, error } = await supabase
             .from('subscriptions')
             .select('is_subscribed')
@@ -140,12 +113,13 @@ app.post('/api/generate-content', async (req: Request, res: Response): Promise<v
             return;
         }
 
-        // إذا كان مشتركاً، يتم توليد المحتوى فوراً
-        const prompt = `You are a professional LinkedIn branding expert. Based on this user profile data: ${JSON.stringify(userProfile)}, generate a highly engaging professional ${contentType} in Arabic and English.`;
+        // هندسة الأوامر (Prompt Engineering) لإنتاج محتوى احترافي ومبهر
+        const prompt = `You are an elite LinkedIn personal branding executive. Analyze this raw text from a user's LinkedIn profile/CV: "${rawProfileText}". Based on it, generate an incredibly professional and highly engaging ${contentType} in both Arabic and English. Format it beautifully with line breaks and relevant professional emojis. Make it stand out to headhunters.`;
+
         const aiResponse = await axios.post('https://openai.com', {
             model: "gpt-4o",
             messages: [{ role: "user", content: prompt }],
-            temperature: 0.7,
+            temperature: 0.8,
         }, {
             headers: {
                 'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
@@ -156,74 +130,6 @@ app.post('/api/generate-content', async (req: Request, res: Response): Promise<v
         res.json({ success: true, content: aiResponse.data.choices.message.content });
     } catch (error: any) {
         res.status(500).json({ error: 'AI Content generation failed', details: error.message });
-    }
-});
-
-import cron from 'node-cron';
-
-// جدولة مهمة مأتمتة تعمل تلقائياً مرة واحدة يومياً عند منتصف الليل (00:00)
-cron.schedule('0 0 * * *', async () => {
-    console.log('Running daily subscription renewal check...');
-
-    try {
-        const thirtyDaysAgo = new Date();
-        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-
-        // 1. فحص سوبابيس لجلب المستخدمين الذين انتهت فترة الـ 30 يوماً الخاصة بهم واشتراكهم نشط
-        const { data: expiredSubscriptions, error } = await supabase
-            .from('subscriptions')
-            .select('*')
-            .eq('is_subscribed', true)
-            .lte('updated_at', thirtyDaysAgo); // تم التحديث قبل 30 يوماً أو أكثر
-
-        if (error) {
-            console.error('Error fetching expired subscriptions:', error.message);
-            return;
-        }
-
-        if (!expiredSubscriptions || expiredSubscriptions.length === 0) {
-            console.log('No subscriptions up for renewal today.');
-            return;
-        }
-
-        // 2. المرور على كل مستخدم منتهي الصلاحية وخصم الاشتراك تلقائياً عبر التوكن الخاص به
-        for (const sub of expiredSubscriptions) {
-            if (!sub.paytabs_token) continue; // تخطي العميل إذا لم يكن لديه بطاقة محفوظة
-
-            const recurringDetails = {
-                tran_type: "recurring", // تحديد العملية كخصم تلقائي متكرر
-                tran_class: "ecom",
-                cart_id: `rec_${sub.id}_${Date.now()}`,
-                cart_currency: "USD",
-                cart_amount: 19.00, // قيمة القسط الشهري الثابت
-                cart_description: "Monthly Renewal - Professional AI Content SaaS",
-                token: sub.paytabs_token // إرسال التوكن السري المخزن للبطاقة
-            };
-
-            // إرسال طلب الدفع الفوري والمخفي لـ PayTabs دون تدخل العميل
-            paytabs.createPaymentPage(recurringDetails, async (result: any) => {
-                if (result && result.payment_result && result.payment_result.response_status === "A") {
-                    console.log(`Successfully renewed subscription for user: ${sub.id}`);
-                    
-                    // تحديث تاريخ التجديد لـ 30 يوماً إضافية في قاعدة البيانات
-                    await supabase
-                        .from('subscriptions')
-                        .update({ updated_at: new Date() })
-                        .eq('id', sub.id);
-                } else {
-                    console.log(`Failed to charge user: ${sub.id}. Subscription will be deactivated.`);
-                    
-                    // إذا فشل الخصم (بسبب انتهاء صلاحية البطاقة أو عدم وجود رصيد)، يتم إيقاف الاشتراك تلقائياً
-                    await supabase
-                        .from('subscriptions')
-                        .update({ is_subscribed: false })
-                        .eq('id', sub.id);
-                }
-            });
-        }
-
-    } catch (err: any) {
-        console.error('Subscription cron job error:', err.message);
     }
 });
 
