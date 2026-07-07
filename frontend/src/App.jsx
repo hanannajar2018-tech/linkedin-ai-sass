@@ -19,7 +19,7 @@ function App() {
   // طلب جلسة دفع من PayTabs
   const handleSubscribe = async () => {
     try {
-      const response = await axios.post('https://railway.applinkedin-ai-sass-production.up.railway.app', {
+      const response = await axios.post('https://railway.app', {
         userId: user.id,
         customerName: user.name,
         customerEmail: user.email,
@@ -48,7 +48,7 @@ function App() {
 
     setLoading(true);
     try {
-      const response = await axios.post('https://railway.applinkedin-ai-sass-production.up.railway.app', {
+      const response = await axios.post('https://railway.app', {
         userId: user.id,
         rawProfileText: profileText,
         contentType: contentType
