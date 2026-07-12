@@ -14,7 +14,8 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 5000;
+
 
 // 1. مسار إنشاء صفحة الدفع الآمنة والاشتراك التلقائي عبر الـ API المباشر لـ PayTabs
 app.post('/api/checkout/session', async (req: Request, res: Response): Promise<void> => {
@@ -122,7 +123,8 @@ app.post('/api/generate-content', async (req: Request, res: Response): Promise<v
     }
 });
 
-app.listen(Number(PORT), '0.0.0.0', () => {
-    console.log(`Server running securely on port ${PORT}`);
+app.listen(PORT, '0.0.0.0', () => {
+    console.log(`Server successfully bonded globally on port ${PORT}`);
 });
+
 
