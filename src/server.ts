@@ -6,8 +6,8 @@ import { createClient } from '@supabase/supabase-js';
 
 dotenv.config();
 
-const supabaseUrl = process.env.SUPABASE_URL || '';
-const supabaseAnonKey = process.env.SUPABASE_ANON_KEY || '';
+const supabaseUrl = process.env.SUPABASE_URL || 'https://zfhhosstncqawgsgnaqr.supabase.co';
+const supabaseAnonKey = process.env.SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpmaGhvc3N0bmNxYXdnc2duYXFyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI4NDcwOTYsImV4cCI6MjA5ODQyMzA5Nn0.APigyGCQf_aqAyioLJvaPTiWVTpNKIUunA7ElRBQXwY';
 const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 const app = express();
