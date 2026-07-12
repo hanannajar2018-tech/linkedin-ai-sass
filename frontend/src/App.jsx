@@ -1,11 +1,11 @@
-﻿import React, { useState } from "react";
+import React, { useState } from "react";
 import axios from "axios";
 import { Sparkles, FileText, CreditCard, Copy, Check, RefreshCw, HelpCircle } from "lucide-react";
 
 function App() {
   const [user, setUser] = useState({
     id: "usr_98234",
-    name: "أحمد المطور",
+    name: "???? ??????",
     email: "ahmed@example.com",
     isSubscribed: false,
   });
@@ -30,17 +30,17 @@ function App() {
         window.location.href = response.data.url;
       }
     } catch (error) {
-      alert("عذراً، فشل الاتصال ببوابة الدفع حالياً.");
+      alert("?????? ??? ??????? ?????? ????? ??????.");
     }
   };
 
   const handleGenerate = async () => {
     if (!user.isSubscribed) {
-      alert("يرجى تفعيل الاشتراك التجريبي أو الحقيقي لتتمكن من استخدام ميزات الذكاء الاصطناعي!");
+      alert("???? ????? ???????? ???????? ?? ??????? ?????? ?? ??????? ????? ?????? ?????????!");
       return;
     }
     if (!profileText.trim()) {
-      alert("الرجاء لصق نص ملفك الشخصي أو سيرتك الذاتية أولاً.");
+      alert("?????? ??? ?? ???? ?????? ?? ????? ??????? ?????.");
       return;
     }
 
@@ -56,7 +56,7 @@ function App() {
         setGeneratedContent(response.data.content);
       }
     } catch (error) {
-      alert("فشل توليد المحتوى. تأكد من تشغيل خادم الـ Backend وضبط مفتاح OpenAI الخاص بك.");
+      alert("??? ????? ???????. ???? ?? ????? ???? ??? Backend ???? ????? OpenAI ????? ??.");
     } finally {
       setLoading(false);
     }
@@ -78,13 +78,13 @@ function App() {
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-2 bg-slate-800 px-3 py-1.5 rounded-full border border-slate-700">
             <div className={`w-2 h-2 rounded-full ${user.isSubscribed ? "bg-emerald-400" : "bg-amber-400"}`}></div>
-            <span className="text-xs">{user.isSubscribed ? "اشتراك نشط" : "باقة مجانية مقيدة"}</span>
+            <span className="text-xs">{user.isSubscribed ? "?????? ???" : "???? ?????? ?????"}</span>
           </div>
           <button 
             onClick={() => setUser({...user, isSubscribed: !user.isSubscribed})} 
             className="text-xs bg-slate-800 hover:bg-slate-700 px-3 py-1.5 rounded text-indigo-300 transition"
           >
-            تغيير حالة الاشتراك (للتجربة المحمية)
+            ????? ???? ???????? (??????? ???????)
           </button>
         </div>
       </nav>
@@ -93,15 +93,15 @@ function App() {
         <div className="md:col-span-1 space-y-6">
           <div className="bg-slate-800/50 border border-slate-700/60 rounded-2xl p-6 backdrop-blur space-y-4">
             <h2 className="text-lg font-semibold flex items-center gap-2 text-indigo-300">
-              <FileText className="w-5 h-5" /> الصق ملفك الشخصي هنا
+              <FileText className="w-5 h-5" /> ???? ???? ?????? ???
             </h2>
             <div className="bg-slate-900/80 p-3 rounded-xl border border-slate-800 space-y-1.5">
-              <div className="text-xs text-slate-400 flex items-center gap-1"><HelpCircle className="w-3.5 h-3.5 text-cyan-400" /> كيف أحصل على النص?</div>
-              <p className="text-[11px] text-slate-400 leading-relaxed">اذهب لبروفايلك في LinkedIn، انسخ قسم "About" أو خبراتك السابقة، وضعه بالأسفل.</p>
+              <div className="text-xs text-slate-400 flex items-center gap-1"><HelpCircle className="w-3.5 h-3.5 text-cyan-400" /> ??? ???? ??? ?????</div>
+              <p className="text-[11px] text-slate-400 leading-relaxed">???? ????????? ?? LinkedIn? ???? ??? "About" ?? ?????? ???????? ???? ???????.</p>
             </div>
             <textarea
               className="w-full h-48 bg-slate-950 border border-slate-700 rounded-xl p-3 text-sm focus:outline-none focus:border-indigo-500 text-slate-300 resize-none font-mono"
-              placeholder="الصق ملخص خبراتك هنا..."
+              placeholder="???? ???? ?????? ???..."
               value={profileText}
               onChange={(e) => setProfileText(e.target.value)}
             />
@@ -110,13 +110,13 @@ function App() {
           {!user.isSubscribed && (
             <div className="bg-gradient-to-br from-indigo-900/40 to-slate-800 border border-indigo-500/30 rounded-2xl p-6 text-center space-y-4">
               <CreditCard className="w-10 h-10 text-indigo-400 mx-auto" />
-              <h3 className="font-bold text-lg text-indigo-200">الترقية للباقة غير المحدودة</h3>
-              <p className="text-xs text-slate-300 leading-relaxed">احصل على صياغات غير محدودة لمنشوراتك اليومية.</p>
+              <h3 className="font-bold text-lg text-indigo-200">??????? ?????? ??? ????????</h3>
+              <p className="text-xs text-slate-300 leading-relaxed">???? ??? ?????? ??? ?????? ????????? ???????.</p>
               <button 
                 onClick={handleSubscribe}
                 className="w-full bg-indigo-600 hover:bg-indigo-500 font-medium text-sm py-3 rounded-xl transition shadow-lg shadow-indigo-600/20"
               >
-                اشترك الآن بـ 19$/شهرياً
+                ????? ???? ?? 19$/??????
               </button>
             </div>
           )}
@@ -125,15 +125,15 @@ function App() {
         <div className="md:col-span-2 space-y-6">
           <div className="bg-slate-800/50 border border-slate-700/60 rounded-2xl p-6 backdrop-blur space-y-6">
             <div>
-              <h2 className="text-lg font-semibold mb-1">صانع المحتوى الرقمي المطور</h2>
-              <p className="text-xs text-slate-400">اختر القالب البرمجي الذكي المناسب لخطتك التسويقية</p>
+              <h2 className="text-lg font-semibold mb-1">???? ??????? ?????? ??????</h2>
+              <p className="text-xs text-slate-400">???? ?????? ??????? ????? ??????? ????? ?????????</p>
             </div>
 
             <div className="grid grid-cols-3 gap-3">
               {[
-                { id: "post", label: "منشور فيروسي تفاعلي (Post)" },
-                { id: "headline", label: "عنوان بروفايل جذاب (Headline)" },
-                { id: "summary", label: "نبذة شخصية احترافية (About)" }
+                { id: "post", label: "????? ?????? ?????? (Post)" },
+                { id: "headline", label: "????? ??????? ???? (Headline)" },
+                { id: "summary", label: "???? ????? ???????? (About)" }
               ].map((tab) => (
                 <button
                   key={tab.id}
@@ -156,11 +156,11 @@ function App() {
             >
               {loading ? (
                 <>
-                  <RefreshCw className="w-5 h-5 animate-spin" /> جاري الصياغة عبر GPT-4o...
+                  <RefreshCw className="w-5 h-5 animate-spin" /> ???? ??????? ??? GPT-4o...
                 </>
               ) : (
                 <>
-                  <Sparkles className="w-5 h-5" /> ابدأ التوليد السحري فوراً
+                  <Sparkles className="w-5 h-5" /> ???? ??????? ?????? ?????
                 </>
               )}
             </button>
@@ -168,13 +168,13 @@ function App() {
             {generatedContent && (
               <div className="bg-slate-950 border border-slate-800 rounded-xl p-5 relative group space-y-4">
                 <div className="flex justify-between items-center border-b border-slate-800 pb-3">
-                  <span className="text-xs text-indigo-400 font-medium">المحتوى المقترح:</span>
+                  <span className="text-xs text-indigo-400 font-medium">??????? ???????:</span>
                   <button
                     onClick={handleCopy}
                     className="text-slate-400 hover:text-slate-200 p-1.5 rounded-md hover:bg-slate-800 transition flex items-center gap-1.5 text-xs"
                   >
                     {copied ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
-                    {copied ? "تم النسخ!" : "نسخ النص"}
+                    {copied ? "?? ?????!" : "??? ????"}
                   </button>
                 </div>
                 <div className="text-sm text-slate-300 leading-relaxed whitespace-pre-wrap">
