@@ -122,6 +122,7 @@ app.post('/api/generate-content', async (req: Request, res: Response): Promise<v
     }
 });
 
-app.listen(PORT, () => {
+app.listen(Number(PORT), '0.0.0.0', () => {
     console.log(`Server running securely on port ${PORT}`);
 });
+
