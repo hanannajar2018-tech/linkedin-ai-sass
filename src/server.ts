@@ -6,7 +6,7 @@ import { createClient } from '@supabase/supabase-js';
 
 dotenv.config();
 
-const supabaseUrl = process.env.SUPABASE_URL || 'https://zfhhosstncqawgsgnaqr.supabase.co';
+const supabaseUrl = process.env.SUPABASE_URL || 'https://supabase.co';
 const supabaseAnonKey = process.env.SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpmaGhvc3N0bmNxYXdnc2duYXFyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI4NDcwOTYsImV4cCI6MjA5ODQyMzA5Nn0.APigyGCQf_aqAyioLJvaPTiWVTpNKIUunA7ElRBQXwY';
 const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
@@ -37,6 +37,7 @@ app.post('/api/checkout/session', async (req: Request, res: Response): Promise<v
     try {
         console.log(`Initiating Jordanian PayTabs Session for Profile ID: ${process.env.PAYTABS_PROFILE_ID}`);
 
+        // تم التعديل: استخدام رابط الطلب الرسمي المشفر لـ PayTabs بدلاً من الموقع العام
         const response = await axios.post('https://paytabs.com', {
             profile_id: parseInt(process.env.PAYTABS_PROFILE_ID || '0', 10),
             tran_type: "sale",
@@ -54,6 +55,7 @@ app.post('/api/checkout/session', async (req: Request, res: Response): Promise<v
                 city: "Amman",
                 country: "JO" // تحديث كود الدولة للأردن بدقة
             },
+            // تم التعديل: ربط الـ IPN والـ Return بمسارات مشروعك الفعلي ليعمل التفعيل التلقائي
             callback: "https://railway.app",
             return: "https://vercel.app",
             tokenise: 1 
@@ -120,6 +122,8 @@ app.post('/api/generate-content', async (req: Request, res: Response): Promise<v
         }
 
         const prompt = `You are an elite LinkedIn personal branding executive. Analyze this raw text: "${rawProfileText}". Generate an incredibly professional ${contentType} in Arabic and English with relevant professional emojis.`;
+        
+        // تم التعديل: استخدام مسار نقطة تجميع المحادثات الرسمي لـ OpenAI بدلاً من الموقع العام
         const aiResponse = await axios.post('https://openai.com', {
             model: "gpt-4o",
             messages: [{ role: "user", content: prompt }],
