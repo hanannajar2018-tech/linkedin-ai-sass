@@ -26,15 +26,16 @@ const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 5000;
 
 // 1. مسار إنشاء صفحة الدفع والاشتراك التلقائي مع صمامات أمان حتمية ضد خطأ 400
 app.post('/api/checkout/session', async (req: Request, res: Response): Promise<void> => {
-    // وضع قيم بديلة ثابتة لمنع انهيار الطلب إذا أرسلت الواجهة بيانات فارغة
     const userId = req.body.userId || 'usr_98234';
-    const customerName = req.body.customerName || 'Ahmed Al Mator';
+    const customerName = req.body.customerName || 'Hanan Tech';
     const customerEmail = req.body.customerEmail || 'customer@example.com';
-    const amount = req.body.amount || 19.00;
-    const currency = req.body.currency || 'USD';
+    
+    // تثبيت القيمة الماليّة والعملة على الدينار الأردني لبيئة الاختبار المخصصة لكِ
+    const amount = 15.00; // قيمة الاشتراك بالدينار الأردني (مثال)
+    const currency = 'JOD'; 
 
     try {
-        console.log("Initiating PayTabs Session for Profile ID:", process.env.PAYTABS_PROFILE_ID);
+        console.log(`Initiating Jordanian PayTabs Session for Profile ID: ${process.env.PAYTABS_PROFILE_ID}`);
 
         const response = await axios.post('https://paytabs.com', {
             profile_id: parseInt(process.env.PAYTABS_PROFILE_ID || '0', 10),
@@ -48,14 +49,14 @@ app.post('/api/checkout/session', async (req: Request, res: Response): Promise<v
             customer_details: {
                 name: customerName,
                 email: customerEmail,
-                phone: "00201000000000",
-                street1: "Main Street",
-                city: "Cairo",
-                country: "EG"
+                phone: "00962700000000", // ترميز الهاتف للأردن
+                street1: "Amman Street",
+                city: "Amman",
+                country: "JO" // تحديث كود الدولة للأردن بدقة
             },
             callback: "https://railway.app",
             return: "https://vercel.app",
-            tokenise: 2 // طلب توكن التجديد التلقائي للشهر القادم
+            tokenise: 1 
         }, {
             headers: {
                 'Authorization': String(process.env.PAYTABS_SERVER_KEY).trim(),
@@ -70,10 +71,11 @@ app.post('/api/checkout/session', async (req: Request, res: Response): Promise<v
             res.status(400).json({ error: "Failed to generate PayTabs token url", details: response.data });
         }
     } catch (error: any) {
-        console.error("PayTabs API Connection Exception:", error.response?.data || error.message);
+        console.error("PayTabs API Connection Exception Stack:", error.response?.data || error.message);
         res.status(500).json({ error: "PayTabs gateway connection failed", details: error.response?.data || error.message });
     }
 });
+
 
 // 2. مسار استقبال تحديثات الدفع الفورية من السيرفر مالي (IPN Webhook)
 app.post('/api/ipn', async (req: Request, res: Response): Promise<void> => {
