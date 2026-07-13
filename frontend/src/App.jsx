@@ -22,8 +22,8 @@ function App() {
         userId: user.id,
         customerName: user.name,
         customerEmail: user.email,
-        amount: 19.00,
-        currency: "USD"
+        amount: 15.00,
+        currency: "JOD"
       });
 
       if (response.data.success && response.data.url) {
