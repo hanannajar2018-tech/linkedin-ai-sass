@@ -18,7 +18,7 @@ function App() {
 
   const handleSubscribe = async () => {
     try {
-      const response = await axios.post("https://railway.app", {
+      const response = await axios.post("https://linkedin-ai-sass-production.up.railway.app/", {
         userId: user.id,
         customerName: user.name,
         customerEmail: user.email,
@@ -46,7 +46,7 @@ function App() {
 
     setLoading(true);
     try {
-      const response = await axios.post("https://railway.app", {
+      const response = await axios.post("https://linkedin-ai-sass-production.up.railway.app/", {
         userId: user.id,
         rawProfileText: profileText,
         contentType: contentType

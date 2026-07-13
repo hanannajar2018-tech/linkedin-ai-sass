@@ -46,7 +46,7 @@ app.post('/api/checkout/session', async (req: Request, res: Response): Promise<v
                 city: "Cairo",
                 country: "EG"
             },
-            callback: "https://railway.app",
+            callback: "https://linkedin-ai-sass-production.up.railway.app/",
             return: "https://vercel.app",
             tokenise: 2 // طلب توليد توكن الخصم الدوري للشهر القادم تلقائياً
         }, {
