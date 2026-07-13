@@ -12,11 +12,12 @@ const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 const app = express();
 app.use(cors({
-    origin: ['https://vercel.app', 'http://localhost:5173'],
+    origin: '*', // فتح الأبواب لجميع النطاقات السحابية والواجهات للاتصال بأمان التام
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
     credentials: true
 }));
+
 
 app.use(express.json());
 
